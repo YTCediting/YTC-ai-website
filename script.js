@@ -1,52 +1,81 @@
-// Simple AI Responses (No API needed)
-const responses = {
-    english: {
-        "hi": "Hey bro! What's up? 😎",
-        "how are you": "I'm lit like YTC edits! 🔥",
-        "default": "Sorry, I'm still learning!"
-    },
-    hindi: {
-        "नमस्ते": "अरे भाई! कैसे हो? 😊",
-        "क्या हाल है": "मस्ती कर रहा हूँ यार!",
-        "default": "मुझे अभी सीखना बाकी है!"
-    },
-    hinglish: {
-        "hi bhai": "Arre yaar! Kaise ho? 😁",
-        "kya chal raha hai": "Bas, YTC ke edits dekh raha tha! 🔥",
-        "default": "Abhi thoda confused hoon!"
-    }
-};
-
-function detectLanguage(text) {
-    if (/[\u0900-\u097F]/.test(text)) return "hindi";
-    if (text.includes("hai") || text.includes("ho")) return "hinglish";
-    return "english";
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0f0f0f;
+    color: white;
+    margin: 0;
+    padding: 20px;
 }
 
-function getAIResponse(text) {
-    const lang = detectLanguage(text);
-    const langResponses = responses[lang];
-    
-    text = text.toLowerCase();
-    for (const [key, value] of Object.entries(langResponses)) {
-        if (text.includes(key)) return value;
-    }
-    return langResponses["default"];
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #1e1e1e;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
 }
 
-function sendMessage() {
-    const userInput = document.getElementById("userInput").value;
-    if (!userInput) return;
+h1 {
+    color: #ff0000;
+    text-align: center;
+    font-size: 2.5em;
+}
 
-    const chatBox = document.getElementById("chatBox");
-    chatBox.innerHTML += `<p class="user-message"><strong>Tum:</strong> ${userInput}</p>`;
-    
-    // Simulate AI thinking
-    setTimeout(() => {
-        const aiResponse = getAIResponse(userInput);
-        chatBox.innerHTML += `<p class="ai-message"><strong>YTC AI:</strong> ${aiResponse}</p>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }, 800);
+.chat-box {
+    height: 500px;
+    border: 2px solid #ff0000;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    overflow-y: auto;
+    background: #121212;
+}
 
-    document.getElementById("userInput").value = "";
+.input-area {
+    display: flex;
+    gap: 10px;
+}
+
+input {
+    flex: 1;
+    padding: 12px;
+    background: #333;
+    border: 1px solid #ff0000;
+    color: white;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+button {
+    padding: 0 20px;
+    background: #ff0000;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* Message styling */
+.message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    max-width: 80%;
+}
+
+.user-message {
+    background: #333;
+    align-self: flex-end;
+}
+
+.ai-message {
+    background: #ff0000;
+    color: white;
+}
+
+.ai-image {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
 }
