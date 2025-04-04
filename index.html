@@ -1,17 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>YTC AI - Smart Assistant</title>
+    <title>YTC AI - Pro Version</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <h1><i class="fas fa-robot"></i> YTC AI</h1>
-        <div class="chat-box" id="chatBox"></div>
+        <div class="header">
+            <img src="https://i.ibb.co/0jQ5J5N/ytc-logo.png" alt="YTC AI" class="logo">
+            <h1>YTC AI Assistant</h1>
+        </div>
+        
+        <div class="chat-box" id="chatBox">
+            <div class="welcome-msg">
+                <p>Hi bhai! Mujhse kuch bhi poocho 😎</p>
+            </div>
+        </div>
+        
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Kuch bhi poocho...">
-            <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+            <input type="text" id="userInput" placeholder="Message..." autocomplete="off">
+            <button id="sendBtn"><i class="fas fa-paper-plane"></i> Send</button>
         </div>
     </div>
     <script src="script.js"></script>
