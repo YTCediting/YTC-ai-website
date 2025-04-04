@@ -1,81 +1,118 @@
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #0f0f0f;
-    color: white;
-    margin: 0;
-    padding: 20px;
+// Memory for repeated questions
+const memory = {};
+
+// Google Custom Search API (Replace with your API key)
+const GOOGLE_API_KEY = "YOUR_GOOGLE_API_KEY";
+const CX = "YOUR_CUSTOM_SEARCH_ENGINE_ID";
+
+async function sendMessage() {
+    const userInput = document.getElementById("userInput").value.trim();
+    if (!userInput) return;
+
+    const chatBox = document.getElementById("chatBox");
+    
+    // Add user message
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user-message";
+    userMsg.innerHTML = `<strong>Tum:</strong> ${userInput}`;
+    chatBox.appendChild(userMsg);
+
+    // Clear input
+    document.getElementById("userInput").value = "";
+
+    // Check memory first
+    if (memory[userInput]) {
+        addAiResponse(memory[userInput]);
+        return;
+    }
+
+    // Show typing indicator
+    const typingIndicator = document.createElement("div");
+    typingIndicator.className = "message ai-message";
+    typingIndicator.innerHTML = "<i>YTC AI soch raha hai...</i>";
+    chatBox.appendChild(typingIndicator);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Decide response type
+    let response;
+    if (userInput.toLowerCase().includes("image") || userInput.toLowerCase().includes("photo")) {
+        response = await getGoogleImage(userInput);
+    } else {
+        response = await getSmartResponse(userInput);
+    }
+
+    // Remove typing indicator
+    chatBox.removeChild(typingIndicator);
+
+    // Add AI response
+    addAiResponse(response);
+    
+    // Store in memory
+    memory[userInput] = response;
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-    background: #1e1e1e;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+function addAiResponse(response) {
+    const chatBox = document.getElementById("chatBox");
+    const aiMsg = document.createElement("div");
+    aiMsg.className = "message ai-message";
+    
+    if (typeof response === "string") {
+        aiMsg.innerHTML = `<strong>YTC AI:</strong> ${response}`;
+    } else {
+        // For image responses
+        aiMsg.innerHTML = `<strong>YTC AI:</strong> Here's what I found:`;
+        const img = document.createElement("img");
+        img.src = response.url;
+        img.alt = response.title;
+        img.className = "ai-image";
+        aiMsg.appendChild(img);
+    }
+    
+    chatBox.appendChild(aiMsg);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-h1 {
-    color: #ff0000;
-    text-align: center;
-    font-size: 2.5em;
+async function getSmartResponse(query) {
+    // Simple AI responses
+    const simpleResponses = {
+        "hi": "Yo bhai! Kaise ho? 😎",
+        "kaisa hai": "Mai to mast hoon! Tera bata?",
+        "kya haal hai": "Zindagi jhandwa fir bhi ghamandwa! 😂",
+        "default": "Samjha nahi bhai, thoda clear pucho!"
+    };
+
+    // Check for simple responses first
+    query = query.toLowerCase();
+    for (const [key, value] of Object.entries(simpleResponses)) {
+        if (query.includes(key)) return value;
+    }
+
+    // For other questions, use a mock "smart" response
+    return `Bhai, "${query}" ka jawab mujhe pata nahi. Google se poochta hoon...`;
 }
 
-.chat-box {
-    height: 500px;
-    border: 2px solid #ff0000;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 15px;
-    overflow-y: auto;
-    background: #121212;
-}
-
-.input-area {
-    display: flex;
-    gap: 10px;
-}
-
-input {
-    flex: 1;
-    padding: 12px;
-    background: #333;
-    border: 1px solid #ff0000;
-    color: white;
-    border-radius: 8px;
-    font-size: 16px;
-}
-
-button {
-    padding: 0 20px;
-    background: #ff0000;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-}
-
-/* Message styling */
-.message {
-    margin: 10px 0;
-    padding: 10px;
-    border-radius: 8px;
-    max-width: 80%;
-}
-
-.user-message {
-    background: #333;
-    align-self: flex-end;
-}
-
-.ai-message {
-    background: #ff0000;
-    color: white;
-}
-
-.ai-image {
-    max-width: 100%;
-    border-radius: 8px;
-    margin-top: 10px;
+async function getGoogleImage(query) {
+    try {
+        // Remove "image" from query
+        const searchQuery = query.replace(/image|photo|picture/gi, "").trim();
+        
+        // Mock response (replace with actual API call)
+        return {
+            url: "https://via.placeholder.com/400x300?text=YTC+AI+Image",
+            title: searchQuery
+        };
+        
+        /* Actual API code (uncomment when you have API keys)
+        const response = await fetch(
+            `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(searchQuery)}&key=${GOOGLE_API_KEY}&cx=${CX}&searchType=image`
+        );
+        const data = await response.json();
+        return {
+            url: data.items[0].link,
+            title: data.items[0].title
+        };
+        */
+    } catch (error) {
+        return "Bhai, image nahi mili. Kuch aur poocho!";
+    }
 }
