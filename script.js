@@ -1,118 +1,64 @@
-// Memory for repeated questions
-const memory = {};
+// Free APIs
+const FREE_AI_API = "https://api-inference.huggingface.co/models/gpt2";
+const RUNWAY_API = "https://api.runwayml.com/v1/text-to-image"; // Mock - use actual if available
 
-// Google Custom Search API (Replace with your API key)
-const GOOGLE_API_KEY = "YOUR_GOOGLE_API_KEY";
-const CX = "YOUR_CUSTOM_SEARCH_ENGINE_ID";
+// Chat memory
+let conversationHistory = [];
+
+document.getElementById('sendBtn').addEventListener('click', sendMessage);
+document.getElementById('userInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') sendMessage();
+});
 
 async function sendMessage() {
-    const userInput = document.getElementById("userInput").value.trim();
+    const userInput = document.getElementById('userInput').value.trim();
     if (!userInput) return;
 
-    const chatBox = document.getElementById("chatBox");
-    
-    // Add user message
-    const userMsg = document.createElement("div");
-    userMsg.className = "message user-message";
-    userMsg.innerHTML = `<strong>Tum:</strong> ${userInput}`;
-    chatBox.appendChild(userMsg);
+    addMessage(userInput, 'user');
+    document.getElementById('userInput').value = '';
+    showTyping();
 
-    // Clear input
-    document.getElementById("userInput").value = "";
-
-    // Check memory first
-    if (memory[userInput]) {
-        addAiResponse(memory[userInput]);
+    // Check if question is repeated
+    const repeatedQ = conversationHistory.find(item => item.question === userInput);
+    if (repeatedQ) {
+        addMessage(repeatedQ.answer, 'ai');
         return;
     }
 
-    // Show typing indicator
-    const typingIndicator = document.createElement("div");
-    typingIndicator.className = "message ai-message";
-    typingIndicator.innerHTML = "<i>YTC AI soch raha hai...</i>";
-    chatBox.appendChild(typingIndicator);
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    // Decide response type
+    // Get AI response
     let response;
-    if (userInput.toLowerCase().includes("image") || userInput.toLowerCase().includes("photo")) {
-        response = await getGoogleImage(userInput);
+    if (userInput.toLowerCase().includes('image') || 
+        userInput.toLowerCase().includes('photo') || 
+        userInput.toLowerCase().includes('picture')) {
+        response = await generateImage(userInput);
     } else {
-        response = await getSmartResponse(userInput);
+        response = await getAIResponse(userInput);
     }
 
-    // Remove typing indicator
-    chatBox.removeChild(typingIndicator);
+    // Add to history
+    conversationHistory.push({
+        question: userInput,
+        answer: response
+    });
 
-    // Add AI response
-    addAiResponse(response);
-    
-    // Store in memory
-    memory[userInput] = response;
+    hideTyping();
+    addMessage(response, 'ai');
 }
 
-function addAiResponse(response) {
-    const chatBox = document.getElementById("chatBox");
-    const aiMsg = document.createElement("div");
-    aiMsg.className = "message ai-message";
+function addMessage(content, sender) {
+    const chatBox = document.getElementById('chatBox');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message ${sender}-message`;
     
-    if (typeof response === "string") {
-        aiMsg.innerHTML = `<strong>YTC AI:</strong> ${response}`;
+    if (typeof content === 'object' && content.type === 'image') {
+        msgDiv.innerHTML = `
+            <strong>YTC AI:</strong> Here's your image:
+            <img src="${content.url}" alt="${content.prompt}" class="ai-image">
+        `;
     } else {
-        // For image responses
-        aiMsg.innerHTML = `<strong>YTC AI:</strong> Here's what I found:`;
-        const img = document.createElement("img");
-        img.src = response.url;
-        img.alt = response.title;
-        img.className = "ai-image";
-        aiMsg.appendChild(img);
+        msgDiv.innerHTML = sender === 'user' 
+            ? `<strong>You:</strong> ${content}`
+            : `<strong>YTC AI:</strong> ${content}`;
     }
     
-    chatBox.appendChild(aiMsg);
-    chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-async function getSmartResponse(query) {
-    // Simple AI responses
-    const simpleResponses = {
-        "hi": "Yo bhai! Kaise ho? 😎",
-        "kaisa hai": "Mai to mast hoon! Tera bata?",
-        "kya haal hai": "Zindagi jhandwa fir bhi ghamandwa! 😂",
-        "default": "Samjha nahi bhai, thoda clear pucho!"
-    };
-
-    // Check for simple responses first
-    query = query.toLowerCase();
-    for (const [key, value] of Object.entries(simpleResponses)) {
-        if (query.includes(key)) return value;
-    }
-
-    // For other questions, use a mock "smart" response
-    return `Bhai, "${query}" ka jawab mujhe pata nahi. Google se poochta hoon...`;
-}
-
-async function getGoogleImage(query) {
-    try {
-        // Remove "image" from query
-        const searchQuery = query.replace(/image|photo|picture/gi, "").trim();
-        
-        // Mock response (replace with actual API call)
-        return {
-            url: "https://via.placeholder.com/400x300?text=YTC+AI+Image",
-            title: searchQuery
-        };
-        
-        /* Actual API code (uncomment when you have API keys)
-        const response = await fetch(
-            `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(searchQuery)}&key=${GOOGLE_API_KEY}&cx=${CX}&searchType=image`
-        );
-        const data = await response.json();
-        return {
-            url: data.items[0].link,
-            title: data.items[0].title
-        };
-        */
-    } catch (error) {
-        return "Bhai, image nahi mili. Kuch aur poocho!";
-    }
-}
+    chatBox.appendChild
